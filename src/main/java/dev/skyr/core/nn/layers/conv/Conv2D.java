@@ -1,12 +1,16 @@
 package dev.skyr.core.nn.layers.conv;
 
 import dev.skyr.core.autograd.Tensor;
+import dev.skyr.core.nn.layers.Module;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import dev.skyr.core.nn.functional.Functions;
 
-public class Conv2D {
+import java.io.Serializable;
+import java.util.HashMap;
+
+public class Conv2D extends Module {
     private int inChannels;
     private int outChannels;
     private int kernelSize;
@@ -37,7 +41,7 @@ public class Conv2D {
         Tensor bias = new Tensor(Nd4j.random.uniform(-upper_bound, upper_bound, DataType.FLOAT, outChannels), true);
         return bias;
     }
-
+//    @Override
     public Tensor forward(Tensor x) {
         long[] originalDataShape = x.data.shape();
         INDArray col = Functions.img2col(x.data, kernelSize, stride, padding);
@@ -50,5 +54,10 @@ public class Conv2D {
         int outputWidth = Functions.getOutputSize((int) originalDataShape[1], kernelSize, stride, padding);
         int outputHeight = Functions.getOutputSize((int) originalDataShape[2], kernelSize, stride, padding);
         return output.view(output.data.shape()[0],outChannels,outputWidth,outputHeight);
+    }
+
+    @Override
+    public HashMap<String, Serializable> parameters() {
+        return null;
     }
 }

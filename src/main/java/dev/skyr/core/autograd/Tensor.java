@@ -30,6 +30,7 @@ public class Tensor {
         this.backwardFn = null;
     }
 
+
     public Tensor add(Tensor other, long[] broadcastShape, String broadcastType) {
         INDArray result = this.data.add(other.data);
         this.child = new Tensor(result,true);
