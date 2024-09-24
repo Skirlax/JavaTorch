@@ -74,7 +74,7 @@ public class BackwardFunctions {
 
     public static void pow_backward(INDArray grad,Tensor child) {
         if (child.leftOperand.requiresGrad) {
-            INDArray dl = grad.mul(child.rightOperand.data.mul(Transforms.pow(child.leftOperand.data,child.rightOperand.data.sub(1))));
+            INDArray dl = grad.mul(Transforms.pow(child.leftOperand.data,child.rightOperand.data.sub(1)).mul(child.rightOperand.data));
             child.leftOperand.backward(dl,child.leftOperand);
         }
         if (child.rightOperand.requiresGrad) {
@@ -136,6 +136,20 @@ public class BackwardFunctions {
     public static void pass(INDArray grad, Tensor child) {
         if (child.leftOperand.requiresGrad) {
             child.leftOperand.backward(grad,child.leftOperand);
+        }
+    }
+
+    public static void transpose_backward(INDArray grad, Tensor child) {
+        if (child.leftOperand.requiresGrad) {
+            INDArray dl = grad.transpose();
+            child.leftOperand.backward(dl,child.leftOperand);
+        }
+    }
+
+    public static void sum_backward(INDArray grad, Tensor child) {
+        if (child.leftOperand.requiresGrad) {
+            INDArray dl = grad.broadcast(child.leftOperand.data.shape());
+            child.leftOperand.backward(dl,child.leftOperand);
         }
     }
 }

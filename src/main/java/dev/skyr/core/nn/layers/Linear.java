@@ -5,13 +5,15 @@ import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
+import java.util.HashMap;
+
 // Checkout: https://github.com/pytorch/pytorch/blob/main/torch/nn/modules/linear.py
 
-public class Linear {
+public class Linear extends Module {
     private int in_features;
     private int out_features;
-    private INDArray weight;
-    private INDArray bias;
+    private Tensor weight;
+    private Tensor bias;
 
     public Linear(int in_features, int out_features) {
         this.in_features = in_features;
@@ -24,19 +26,28 @@ public class Linear {
     // Pytorch style initialization. This helps to keep the parameters in a manageable range,
     //  so they don't grow or shrink too much when the layer size increases.
 
-    private INDArray init_weights(int in_features, int out_features) {
+    private Tensor init_weights(int in_features, int out_features) {
         double upper_bound = 1 / Math.sqrt(in_features);
-        INDArray weight = Nd4j.random.uniform(-upper_bound, upper_bound, DataType.FLOAT, out_features, in_features);
-        return weight;
-    }
+        INDArray weight = Nd4j.random.uniform(-upper_bound, upper_bound, DataType.DOUBLE, out_features, in_features);
+        return new Tensor(weight, true);
 
-    private INDArray init_bias(int out_features) {
+    }
+    private Tensor init_bias(int out_features) {
         double upper_bound = 1 / Math.sqrt(out_features);
-        INDArray bias = Nd4j.random.uniform(-upper_bound, upper_bound, DataType.FLOAT, out_features);
-        return bias;
+        INDArray bias = Nd4j.random.uniform(-upper_bound, upper_bound, DataType.DOUBLE, out_features,1);
+        return new Tensor(bias, true);
     }
 
     public Tensor forward(Tensor x) {
-        return x.matmul(new Tensor(this.weight.transpose(), true)).add(new Tensor(this.bias, true));
+        Tensor partialOut = x.matmul(this.weight.transpose());
+        return partialOut.add(this.bias.broadcast(partialOut.data.shape()));
+    }
+
+    @Override
+    public HashMap<String, Tensor> parameters() {
+        HashMap<String, Tensor> params = new HashMap<>();
+        params.put("weights", this.weight);
+        params.put("bias", this.bias);
+        return params;
     }
 }

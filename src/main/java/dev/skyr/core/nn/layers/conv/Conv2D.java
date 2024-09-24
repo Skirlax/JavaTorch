@@ -31,33 +31,37 @@ public class Conv2D extends Module {
 
     private Tensor makeWeights() {
         double upper_bound = Math.sqrt(1.0 / (inChannels * kernelSize * kernelSize));
-        Tensor weight = new Tensor(Nd4j.random.uniform(-upper_bound, upper_bound, DataType.FLOAT, outChannels, inChannels, kernelSize, kernelSize), true);
+        Tensor weight = new Tensor(Nd4j.random.uniform(-upper_bound, upper_bound, DataType.DOUBLE, outChannels, inChannels, kernelSize, kernelSize), true);
         return weight;
 
     }
 
     private Tensor makeBias() {
         double upper_bound = Math.sqrt(1.0 / inChannels * kernelSize * kernelSize);
-        Tensor bias = new Tensor(Nd4j.random.uniform(-upper_bound, upper_bound, DataType.FLOAT, outChannels), true);
+        Tensor bias = new Tensor(Nd4j.random.uniform(-upper_bound, upper_bound, DataType.DOUBLE, outChannels), true);
         return bias;
     }
-//    @Override
+
+    //    @Override
     public Tensor forward(Tensor x) {
         long[] originalDataShape = x.data.shape();
         INDArray col = Functions.img2col(x.data, kernelSize, stride, padding);
         x.rebuildWithNewData(col);
-        Tensor weight = weights.view(1,outChannels,-1);
-        weight = weight.broadcast(x.data.shape()[0],weight.data.shape()[1],weight.data.shape()[2]);
-        Tensor broadcastedBias = bias.view(1,-1,1);
-        broadcastedBias = broadcastedBias.broadcast(x.data.shape()[0],broadcastedBias.data.shape()[1],x.data.shape()[2]);
+        Tensor weight = weights.view(1, outChannels, -1);
+        weight = weight.broadcast(x.data.shape()[0], weight.data.shape()[1], weight.data.shape()[2]);
+        Tensor broadcastedBias = bias.view(1, -1, 1);
+        broadcastedBias = broadcastedBias.broadcast(x.data.shape()[0], broadcastedBias.data.shape()[1], x.data.shape()[2]);
         Tensor output = weight.matmul(x).add(broadcastedBias);
         int outputWidth = Functions.getOutputSize((int) originalDataShape[1], kernelSize, stride, padding);
         int outputHeight = Functions.getOutputSize((int) originalDataShape[2], kernelSize, stride, padding);
-        return output.view(output.data.shape()[0],outChannels,outputWidth,outputHeight);
+        return output.view(output.data.shape()[0], outChannels, outputWidth, outputHeight);
     }
 
     @Override
-    public HashMap<String, Serializable> parameters() {
-        return null;
+    public HashMap<String, Tensor> parameters() {
+        HashMap<String, Tensor> params = new HashMap<>();
+        params.put("weights", this.weights);
+        params.put("bias", this.bias);
+        return params;
     }
 }

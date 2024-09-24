@@ -19,14 +19,14 @@ public class Tensor {
     public Tensor(INDArray data, boolean requiresGrad) {
         this.data = data;
         this.requiresGrad = requiresGrad;
-        this.grad = Nd4j.zeros(DataType.FLOAT, data.shape());
+        this.grad = Nd4j.zeros(DataType.DOUBLE, data.shape());
         this.backwardFn = null;
     }
 
     public Tensor(double data, boolean requiresGrad) {
         this.data = Nd4j.scalar(data);
         this.requiresGrad = requiresGrad;
-        this.grad = Nd4j.zeros(DataType.FLOAT, this.data.shape());
+        this.grad = Nd4j.zeros(DataType.DOUBLE, this.data.shape());
         this.backwardFn = null;
     }
 
@@ -120,6 +120,43 @@ public class Tensor {
         return this.child;
     }
 
+    public Tensor transpose() {
+        if (this.data.rank() != 2) {
+            throw new IllegalArgumentException("Only 2D tensors are supported");
+        }
+        INDArray result = this.data.transpose();
+        this.child = new Tensor(result,true);
+        this.child.leftOperand = this;
+        this.child.backwardFn = "transpose_backward";
+        return this.child;
+    }
+
+    private Tensor max(int... axis) {
+        INDArray result = this.data.max(axis);
+        this.child = new Tensor(result,true);
+        this.child.leftOperand = this;
+        this.child.backwardFn = "max_backward";
+        return this.child;
+    }
+
+    public Tensor sum(int axis) {
+//        this.originalShape = this.data.shape();
+        INDArray result = this.data.sum(true,axis);
+        this.child = new Tensor(result,true);
+        this.child.leftOperand = this;
+        this.child.backwardFn = "sum_backward";
+        return this.child;
+    }
+
+    public Tensor mean(int axis) {
+        long shapeAtAxis = this.data.shape()[axis];
+        Tensor result = this.sum(axis);
+        return result.truediv(new Tensor(shapeAtAxis,true));
+
+    }
+
+
+
     public void backward(INDArray gradient,Tensor child_) {
         if (!this.requiresGrad) {
             System.out.println("No");
@@ -137,13 +174,17 @@ public class Tensor {
         }
     }
 
+    public void backward() {
+        this.backward(null,null);
+    }
+
     private void setOperands(Tensor other,Tensor child) {
         child.leftOperand = this;
         child.rightOperand = other;
     }
     public void rebuildWithNewData(INDArray newData) {
         this.data = newData;
-        this.grad = Nd4j.zeros(DataType.FLOAT, newData.shape());
+        this.grad = Nd4j.zeros(DataType.DOUBLE, newData.shape());
     }
 
 }
