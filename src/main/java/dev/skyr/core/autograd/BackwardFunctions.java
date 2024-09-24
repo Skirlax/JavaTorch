@@ -1,8 +1,11 @@
 package dev.skyr.core.autograd;
 
+import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.cpu.nativecpu.NDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.conditions.Condition;
+import org.nd4j.linalg.indexing.conditions.Conditions;
 import org.nd4j.linalg.ops.transforms.Transforms;
 
 import java.lang.reflect.Method;
@@ -13,7 +16,7 @@ public class BackwardFunctions {
             Method method = BackwardFunctions.class.getDeclaredMethod(name, INDArray.class, Tensor.class);
             method.invoke(null, grad, tensor);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -156,6 +159,13 @@ public class BackwardFunctions {
     public static void max_backward(INDArray grad, Tensor child) {
         if (child.leftOperand.requiresGrad) {
             INDArray mask = child.leftOperand.data.eq(child.data);
+            INDArray dl = grad.mul(mask);
+            child.leftOperand.backward(dl,child.leftOperand);
+        }
+    }
+    public static void relu_backward(INDArray grad, Tensor child) {
+        if (child.leftOperand.requiresGrad) {
+            INDArray mask = child.leftOperand.data.gt(0).castTo(DataType.DOUBLE);
             INDArray dl = grad.mul(mask);
             child.leftOperand.backward(dl,child.leftOperand);
         }

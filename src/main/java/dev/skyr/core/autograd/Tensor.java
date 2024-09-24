@@ -187,4 +187,17 @@ public class Tensor {
         this.grad = Nd4j.zeros(DataType.DOUBLE, newData.shape());
     }
 
+    public void createChildAndRegister(Tensor parent,Tensor child,String backwardFn, Tensor rightOperand) {
+        parent.child = child;
+        parent.child.leftOperand = parent;
+        if (rightOperand != null) {
+            parent.child.rightOperand = rightOperand;
+        }
+        parent.child.backwardFn = backwardFn;
+    }
+
+    public void createChildAndRegister(Tensor parent,Tensor child,String backwardFn) {
+        createChildAndRegister(parent,child,backwardFn,null);
+    }
+
 }
