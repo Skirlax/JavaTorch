@@ -131,8 +131,8 @@ public class Tensor {
         return this.child;
     }
 
-    private Tensor max(int... axis) {
-        INDArray result = this.data.max(axis);
+    public Tensor max(int axis) {
+        INDArray result = this.data.max(true,axis);
         this.child = new Tensor(result,true);
         this.child.leftOperand = this;
         this.child.backwardFn = "max_backward";

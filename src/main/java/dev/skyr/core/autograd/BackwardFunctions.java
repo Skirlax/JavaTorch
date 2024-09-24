@@ -152,4 +152,12 @@ public class BackwardFunctions {
             child.leftOperand.backward(dl,child.leftOperand);
         }
     }
+
+    public static void max_backward(INDArray grad, Tensor child) {
+        if (child.leftOperand.requiresGrad) {
+            INDArray mask = child.leftOperand.data.eq(child.data);
+            INDArray dl = grad.mul(mask);
+            child.leftOperand.backward(dl,child.leftOperand);
+        }
+    }
 }
