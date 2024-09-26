@@ -17,7 +17,7 @@ public class Adam {
     private double learningRate;
     private double l2;
     private int t = 0;
-    private HashMap<String,Tensor> parameters;
+    private HashMap<String, Tensor> parameters;
 
 
     public Adam(HashMap<String, Tensor> parameters, double learningRate, double beta1, double beta2, double epsilon, double l2) {
@@ -31,16 +31,16 @@ public class Adam {
         this.v = initMV();
     }
 
-    public Adam(HashMap<String, Tensor> parameters,double learningRate, double beta1, double beta2, double epsilon) {
-        this(parameters,learningRate, beta1, beta2, epsilon, 0.0);
+    public Adam(HashMap<String, Tensor> parameters, double learningRate, double beta1, double beta2, double epsilon) {
+        this(parameters, learningRate, beta1, beta2, epsilon, 0.0);
     }
 
     public Adam(HashMap<String, Tensor> parameters, double learningRate, double beta1, double beta2) {
-        this(parameters,learningRate, beta1, beta2, 1e-7);
+        this(parameters, learningRate, beta1, beta2, 1e-7);
     }
 
     public Adam(HashMap<String, Tensor> parameters, double learningRate) {
-        this(parameters,learningRate, 0.9, 0.999);
+        this(parameters, learningRate, 0.9, 0.999);
     }
 
     private HashMap<String, INDArray> initMV() {
@@ -66,8 +66,8 @@ public class Adam {
             this.v.put(key, this.v.get(key).mul(this.beta2).add(grad.mul(grad).mul(1 - this.beta2)));
 
 
-            INDArray m_hat = this.m.get(key).div(1 - Math.pow(this.beta1,this.t));
-            INDArray v_hat = this.v.get(key).div(1 - Math.pow(this.beta2,this.t));
+            INDArray m_hat = this.m.get(key).div(1 - Math.pow(this.beta1, this.t));
+            INDArray v_hat = this.v.get(key).div(1 - Math.pow(this.beta2, this.t));
             p.data = p.data.sub(m_hat.mul(this.learningRate).div(Transforms.sqrt(v_hat).add(this.epsilon)));
         }
     }
@@ -77,7 +77,6 @@ public class Adam {
             parameters.get(key).grad = Nd4j.zeros(parameters.get(key).grad.shape());
         }
     }
-
 
 
 }

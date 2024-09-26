@@ -4,8 +4,6 @@ import dev.skyr.core.autograd.Tensor;
 import dev.skyr.core.nn.layers.Module;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.indexing.conditions.Conditions;
 
 import java.util.HashMap;
 
@@ -13,10 +11,12 @@ public class ReLU extends Module {
     public ReLU() {
     }
 
+    @Override
     public Tensor forward(Tensor x) {
-        INDArray data = x.data.gt(0).castTo(DataType.DOUBLE).mul(x.data);
+        INDArray dataMask = x.data.gt(0).castTo(DataType.DOUBLE);
+        INDArray data = x.data.mul(dataMask);
         Tensor dataT = new Tensor(data, true);
-        x.createChildAndRegister(x,dataT, "relu_backward");
+        x.createChildAndRegisterBackward(x,dataT, "relu_backward");
         return dataT;
     }
 

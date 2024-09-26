@@ -27,6 +27,8 @@ public class Conv2D extends Module {
         this.padding = padding;
         this.weights = makeWeights();
         this.bias = makeBias();
+        this.weights.persistGrad();
+        this.bias.persistGrad();
     }
 
     private Tensor makeWeights() {
@@ -42,19 +44,30 @@ public class Conv2D extends Module {
         return bias;
     }
 
-    //    @Override
+    @Override
     public Tensor forward(Tensor x) {
         long[] originalDataShape = x.data.shape();
         INDArray col = Functions.img2col(x.data, kernelSize, stride, padding);
-        x.rebuildWithNewData(col);
+        HashMap<String,Double> additionalInfo = new HashMap<>(){
+            {
+                put("width", (double) originalDataShape[2]);
+                put("height", (double) originalDataShape[3]);
+                put("channels", (double) originalDataShape[1]);
+                put("kernelSize", (double) kernelSize);
+                put("stride", (double) stride);
+                put("padding", (double) padding);
+            }
+        };
+        Tensor xCol = new Tensor(col, true);
+        x.createChildAndRegisterBackward(x,xCol,"reverse_col2img",additionalInfo);
         Tensor weight = weights.view(1, outChannels, -1);
-        weight = weight.broadcast(x.data.shape()[0], weight.data.shape()[1], weight.data.shape()[2]);
+        weight = weight.broadcast(xCol.data.shape()[0], weight.data.shape()[1], weight.data.shape()[2]);
         Tensor broadcastedBias = bias.view(1, -1, 1);
-        broadcastedBias = broadcastedBias.broadcast(x.data.shape()[0], broadcastedBias.data.shape()[1], x.data.shape()[2]);
-        Tensor output = weight.matmul(x).add(broadcastedBias);
-        int outputWidth = Functions.getOutputSize((int) originalDataShape[1], kernelSize, stride, padding);
-        int outputHeight = Functions.getOutputSize((int) originalDataShape[2], kernelSize, stride, padding);
-        return output.view(output.data.shape()[0], outChannels, outputWidth, outputHeight);
+        broadcastedBias = broadcastedBias.broadcast(xCol.data.shape()[0], broadcastedBias.data.shape()[1], xCol.data.shape()[2]);
+        Tensor output = weight.matmul(xCol).add(broadcastedBias);
+        int outputWidth = Functions.getOutputSize((int) originalDataShape[2], kernelSize, stride, padding);
+        int outputHeight = Functions.getOutputSize((int) originalDataShape[3], kernelSize, stride, padding);
+        return output.view(output.data.shape()[0], outChannels,outputWidth, outputHeight);
     }
 
     @Override

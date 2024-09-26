@@ -20,6 +20,8 @@ public class Linear extends Module {
         this.out_features = out_features;
         this.weight = init_weights(in_features, out_features);
         this.bias = init_bias(out_features);
+        this.weight.persistGrad();
+        this.bias.persistGrad();
 
     }
 
@@ -34,7 +36,7 @@ public class Linear extends Module {
     }
     private Tensor init_bias(int out_features) {
         double upper_bound = 1 / Math.sqrt(out_features);
-        INDArray bias = Nd4j.random.uniform(-upper_bound, upper_bound, DataType.DOUBLE, out_features,1);
+        INDArray bias = Nd4j.random.uniform(-upper_bound, upper_bound, DataType.DOUBLE, out_features);
         return new Tensor(bias, true);
     }
 
