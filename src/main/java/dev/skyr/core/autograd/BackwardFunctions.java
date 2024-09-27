@@ -3,16 +3,11 @@ package dev.skyr.core.autograd;
 import dev.skyr.core.nn.functional.Functions;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.cpu.nativecpu.NDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.indexing.conditions.Condition;
-import org.nd4j.linalg.indexing.conditions.Conditions;
 import org.nd4j.linalg.ops.transforms.Transforms;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.OptionalLong;
-import java.util.function.Predicate;
 
 public class BackwardFunctions {
     public static void execute(String name, INDArray grad, Tensor tensor) {

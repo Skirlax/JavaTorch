@@ -2,7 +2,6 @@ package dev.skyr;
 
 import dev.skyr.core.SimpleConvNet;
 import dev.skyr.core.autograd.Tensor;
-import dev.skyr.core.nn.activations.modules.ReLU;
 import dev.skyr.core.nn.criterions.modules.CrossEntropy;
 import dev.skyr.core.nn.optimizers.Adam;
 import org.nd4j.linalg.api.buffer.DataType;
