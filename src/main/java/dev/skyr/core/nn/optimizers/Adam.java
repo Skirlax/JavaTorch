@@ -58,6 +58,7 @@ public class Adam {
                 continue;
             }
             Tensor p = parameters.get(key);
+//            System.out.println(p.grad);
             if (this.l2 > 0) {
                 p.grad.addi(p.data.mul(this.l2));
             }
@@ -69,6 +70,7 @@ public class Adam {
             INDArray m_hat = this.m.get(key).div(1 - Math.pow(this.beta1, this.t));
             INDArray v_hat = this.v.get(key).div(1 - Math.pow(this.beta2, this.t));
             p.data = p.data.sub(m_hat.mul(this.learningRate).div(Transforms.sqrt(v_hat).add(this.epsilon)));
+//            System.out.println("x");
         }
     }
 

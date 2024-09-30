@@ -21,18 +21,24 @@ public class Main {
         Tensor tensorY = new Tensor(y, true);
         SimpleConvNet model = new SimpleConvNet(3);
         CrossEntropy lossFn = new CrossEntropy();
-        double lr = 0.0005;
+        double lr = 0.001;
         Adam optimizer = new Adam(model.parameters(), lr);
         int epochs = 1000;
+        // IN the loop tensor children are wiped but out of it they still exist???
         for (int i = 0; i < epochs; i++) {
+            tensorX = tensorX.detach(true);
+            tensorY = tensorY.detach(true);
             Tensor pred = model.forward(tensorX);
             Tensor loss = lossFn.forward(pred, tensorY);
             System.out.println("Epoch: " + i + " Loss: " + loss.data);
             loss.backward();
+            loss.compGraphToFile("graph.png");
             optimizer.step();
             optimizer.zero_grad();
+
+            System.gc();
         }
-        System.out.println(model.forward(tensorX));
+//        System.out.println(model.forward(tensorX));
 
 
 

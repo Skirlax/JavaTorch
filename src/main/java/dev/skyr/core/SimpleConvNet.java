@@ -6,6 +6,7 @@ import dev.skyr.core.nn.activations.modules.Softmax;
 import dev.skyr.core.nn.layers.CustomModule;
 import dev.skyr.core.nn.layers.Linear;
 import dev.skyr.core.nn.layers.conv.Conv2D;
+import org.nd4j.linalg.indexing.NDArrayIndex;
 
 public class SimpleConvNet extends CustomModule {
     private Conv2D conv1;

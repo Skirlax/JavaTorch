@@ -58,7 +58,7 @@ public class Conv2D extends Module {
                 put("padding", (double) padding);
             }
         };
-        Tensor xCol = new Tensor(col, true);
+        Tensor xCol = new Tensor(col,x.requiresGrad);
         x.createChildAndRegisterBackward(x,xCol,"reverse_col2img",additionalInfo);
         Tensor weight = weights.view(1, outChannels, -1);
         weight = weight.broadcast(xCol.data.shape()[0], weight.data.shape()[1], weight.data.shape()[2]);

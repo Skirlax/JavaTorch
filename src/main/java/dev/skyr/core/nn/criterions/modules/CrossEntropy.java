@@ -21,7 +21,8 @@ public class CrossEntropy extends Module {
             throw new IllegalArgumentException("Expected x and y to have the same shape. Got x: " + Arrays.toString(x.data.shape()) + " and y: " + Arrays.toString(y.data.shape()));
         }
         Tensor exp = x.exp();
-        Tensor out = exp.truediv(exp.sum(1).broadcast(exp.data.shape()));
+//        System.out.println(exp.detach().sum(1).sum(0).data);
+        Tensor out = exp.truediv(exp.detach(true).sum(1).broadcast(exp.data.shape()));
         Tensor loss = out.ln().neg();
         loss = loss.mul(y);
         return loss.sum(1).mean(0);

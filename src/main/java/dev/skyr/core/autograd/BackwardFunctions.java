@@ -21,11 +21,11 @@ public class BackwardFunctions {
 
     public static void add_backward(INDArray grad, Tensor child) {
         if (child.leftOperand.requiresGrad) {
-            INDArray dl = grad;
+            INDArray dl = grad.dup();
             child.leftOperand.backward(dl, child.leftOperand);
         }
         if (child.rightOperand.requiresGrad) {
-            INDArray dr = grad;
+            INDArray dr = grad.dup();
             child.rightOperand.backward(dr, child.rightOperand);
         }
     }
@@ -87,7 +87,7 @@ public class BackwardFunctions {
 
     public static void view_backward(INDArray grad, Tensor child) {
         if (child.leftOperand.requiresGrad) {
-            INDArray dl = grad.reshape(child.leftOperand.originalShape);
+            INDArray dl = grad.dup().reshape(child.leftOperand.originalShape);
             child.leftOperand.backward(dl, child.leftOperand);
         }
 
@@ -95,14 +95,14 @@ public class BackwardFunctions {
 
     public static void broadcast_backward(INDArray grad, Tensor child) {
         if (child.leftOperand.requiresGrad) {
-            INDArray dl = reverse_broadcast(grad, child.leftOperand.originalShape);
+            INDArray dl = reverse_broadcast(grad.dup(), child.leftOperand.originalShape);
             child.leftOperand.backward(dl, child.leftOperand);
         }
     }
 
     public static void permute_backward(INDArray grad, Tensor child) {
         if (child.leftOperand.requiresGrad) {
-            INDArray dl = grad.permute(child.leftOperand.permute);
+            INDArray dl = grad.dup().permute(child.leftOperand.permute);
             child.leftOperand.backward(dl, child.leftOperand);
         }
     }
@@ -141,14 +141,14 @@ public class BackwardFunctions {
 
     public static void transpose_backward(INDArray grad, Tensor child) {
         if (child.leftOperand.requiresGrad) {
-            INDArray dl = grad.transpose();
+            INDArray dl = grad.dup().transpose();
             child.leftOperand.backward(dl, child.leftOperand);
         }
     }
 
     public static void sum_backward(INDArray grad, Tensor child) {
         if (child.leftOperand.requiresGrad) {
-            INDArray dl = grad.broadcast(child.leftOperand.data.shape());
+            INDArray dl = grad.dup().broadcast(child.leftOperand.data.shape());
             child.leftOperand.backward(dl, child.leftOperand);
         }
     }
@@ -179,7 +179,7 @@ public class BackwardFunctions {
 
     public static void reverse_col2img(INDArray grad, Tensor child) {
         if (child.leftOperand.requiresGrad) {
-            INDArray dl = Functions.col2img(grad, child.additionalInfo.get("stride").intValue(), child.additionalInfo.get("kernelSize").intValue(), child.additionalInfo.get("height").intValue(), child.additionalInfo.get("width").intValue(), child.additionalInfo.get("channels").intValue(),child.additionalInfo.get("padding").intValue());
+            INDArray dl = Functions.col2img(grad.dup(), child.additionalInfo.get("stride").intValue(), child.additionalInfo.get("kernelSize").intValue(), child.additionalInfo.get("height").intValue(), child.additionalInfo.get("width").intValue(), child.additionalInfo.get("channels").intValue(),child.additionalInfo.get("padding").intValue());
             child.leftOperand.backward(dl, child.leftOperand);
         }
     }
