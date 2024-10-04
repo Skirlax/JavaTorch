@@ -3,6 +3,7 @@ package dev.skyr.core.nn.functional;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.factory.ops.NDBase;
 import org.nd4j.linalg.indexing.INDArrayIndex;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 
@@ -42,6 +43,37 @@ public class Functions {
         return col;
     }
 
+    public static INDArray img2colOptimized(INDArray input, int kernelSize, int stride, int padding) {
+        if (padding > 0) {
+            input = Nd4j.pad(input, new int[][]{{0, 0}, {0, 0}, {padding, padding}, {padding, padding}});
+        }
+        long batch_size = input.size(0);
+        long channels = input.size(1);
+        long width = input.size(2);
+        long height = input.size(3);
+        long hor_slides = ((width - kernelSize) / stride) + 1;
+        long ver_slides = ((height - kernelSize) / stride) + 1;
+        long column_size = kernelSize * kernelSize * channels;
+        NDBase base = new NDBase();
+        INDArray rowIndices = getRowIndicesForGather(input,stride,kernelSize);
+        return rowIndices;
+    }
+
+    private static INDArray getRowIndicesForGather(INDArray input, int stride, int kernelsize) {
+        long num_rows = input.size(2);
+        INDArray indices = Nd4j.arange(num_rows);
+        INDArray newIndices = Nd4j.zeros((int) num_rows / kernelsize, kernelsize);
+        for (int i = 0; i < num_rows; i += stride) {
+            INDArray indexIndices = indices.get(
+                    NDArrayIndex.interval(i, i + kernelsize));
+            newIndices.put(new INDArrayIndex[]{
+                    NDArrayIndex.point(i % kernelsize)}, indexIndices);
+
+        }
+        return indices;
+
+    }
+
     public static int getOutputSize(int inputSize, int kernelSize, int stride, int padding) {
         return ((inputSize - kernelSize + 2 * padding) / stride) + 1;
     }
@@ -49,7 +81,7 @@ public class Functions {
     public static INDArray col2img(INDArray col, int stride, int kernelSize, int height, int width, int channels, int padding) {
         col = col.permute(0, 2, 1);
         INDArray img = Nd4j.zeros(DataType.DOUBLE, col.size(0), channels, height + 2L * padding, width + 2L * padding);
-        int horizontal_slides = ((width + 2* padding - kernelSize) / stride) + 1;
+        int horizontal_slides = ((width + 2 * padding - kernelSize) / stride) + 1;
         for (int i = 0; i < col.size(1); i += stride) {
             INDArray window = col.get(
                     NDArrayIndex.all(),
@@ -68,8 +100,8 @@ public class Functions {
             return img.get(
                     NDArrayIndex.all(),
                     NDArrayIndex.all(),
-                    NDArrayIndex.interval(padding,padding + height),
-                    NDArrayIndex.interval(padding,padding + width)
+                    NDArrayIndex.interval(padding, padding + height),
+                    NDArrayIndex.interval(padding, padding + width)
             );
         }
         return img;

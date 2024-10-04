@@ -47,7 +47,7 @@ public class Conv2D extends Module {
     @Override
     public Tensor forward(Tensor x) {
         long[] originalDataShape = x.data.shape();
-        INDArray col = Functions.img2col(x.data, kernelSize, stride, padding);
+        INDArray col = Functions.img2colOptimized(x.data, kernelSize, stride, padding);
         HashMap<String,Double> additionalInfo = new HashMap<>(){
             {
                 put("width", (double) originalDataShape[2]);
